@@ -36,6 +36,11 @@ public final class ReservationTestDataFactory {
     }
 
     public static Reservation reservation(
+            Court court, Customer customer, LocalDateTime start, LocalDateTime end) {
+        return reservation(court, customer, start, end, GameType.SINGLES);
+    }
+
+    public static Reservation reservation(
             Court court,
             Customer customer,
             LocalDateTime start,
