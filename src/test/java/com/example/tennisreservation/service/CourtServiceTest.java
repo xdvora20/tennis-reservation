@@ -8,7 +8,8 @@ import static org.mockito.Mockito.when;
 import com.example.tennisreservation.dao.CourtDao;
 import com.example.tennisreservation.entity.Court;
 import com.example.tennisreservation.exception.NotFoundException;
-import com.example.tennisreservation.utils.TestData;
+import com.example.tennisreservation.utils.CourtTestDataFactory;
+import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class CourtServiceTest {
 
     @Test
     void getById_existingEntity_returnsIt() {
-        Court court = TestData.court(1, TestData.surfaceType());
+        Court court = CourtTestDataFactory.court(1, SurfaceTypeTestDataFactory.surfaceType());
         when(courtDao.findById(1L)).thenReturn(Optional.of(court));
 
         assertThat(service.getById(1L)).isSameAs(court);
@@ -40,7 +41,7 @@ class CourtServiceTest {
 
     @Test
     void getByNumber_existingCourt_returnsIt() {
-        Court court = TestData.court(7, TestData.surfaceType());
+        Court court = CourtTestDataFactory.court(7, SurfaceTypeTestDataFactory.surfaceType());
         when(courtDao.findByCourtNumber(7)).thenReturn(Optional.of(court));
 
         assertThat(service.getByNumber(7)).isSameAs(court);
@@ -55,7 +56,7 @@ class CourtServiceTest {
 
     @Test
     void getAll_returnsAllFromDao() {
-        List<Court> all = List.of(TestData.court(1, TestData.surfaceType()));
+        List<Court> all = List.of(CourtTestDataFactory.court(1, SurfaceTypeTestDataFactory.surfaceType()));
         when(courtDao.findAll()).thenReturn(all);
 
         assertThat(service.getAll()).isEqualTo(all);
@@ -63,7 +64,7 @@ class CourtServiceTest {
 
     @Test
     void create_savesAndReturnsEntity() {
-        Court court = TestData.court(1, TestData.surfaceType());
+        Court court = CourtTestDataFactory.court(1, SurfaceTypeTestDataFactory.surfaceType());
         when(courtDao.save(court)).thenReturn(court);
 
         assertThat(service.create(court)).isSameAs(court);
@@ -72,7 +73,7 @@ class CourtServiceTest {
 
     @Test
     void update_savesAndReturnsEntity() {
-        Court court = TestData.court(1, TestData.surfaceType());
+        Court court = CourtTestDataFactory.court(1, SurfaceTypeTestDataFactory.surfaceType());
         when(courtDao.save(court)).thenReturn(court);
 
         assertThat(service.update(court)).isSameAs(court);

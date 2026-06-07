@@ -1,5 +1,8 @@
 package com.example.tennisreservation.service;
 
+import static com.example.tennisreservation.utils.ReservationTestDataFactory.END;
+import static com.example.tennisreservation.utils.ReservationTestDataFactory.START;
+import static com.example.tennisreservation.utils.ReservationTestDataFactory.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,15 +13,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.tennisreservation.dao.ReservationDao;
-import com.example.tennisreservation.entity.Court;
-import com.example.tennisreservation.entity.Customer;
 import com.example.tennisreservation.entity.GameType;
 import com.example.tennisreservation.entity.Reservation;
-import com.example.tennisreservation.entity.SurfaceType;
 import com.example.tennisreservation.exception.BadRequestException;
 import com.example.tennisreservation.exception.NotFoundException;
-import com.example.tennisreservation.utils.TestData;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -35,9 +33,6 @@ class ReservationServiceTest {
     private ReservationDao reservationDao;
     @InjectMocks
     private ReservationService service;
-
-    private static final LocalDateTime START = LocalDateTime.of(2030, 1, 1, 10, 0);
-    private static final LocalDateTime END = LocalDateTime.of(2030, 1, 1, 11, 0);
 
     @Test
     void create_singlesGame_savesWithPricePerMinuteTimesMinutes() {
@@ -171,13 +166,5 @@ class ReservationServiceTest {
         when(reservationDao.deleteById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> service.delete(1L)).isInstanceOf(NotFoundException.class);
-    }
-
-    private static Reservation reservation(
-            String pricePerMinute, LocalDateTime start, LocalDateTime end, GameType gameType) {
-        SurfaceType surface = TestData.surfaceType("Clay", pricePerMinute);
-        Court court = TestData.court(1, surface);
-        Customer customer = TestData.customer();
-        return TestData.reservation(court, customer, start, end, gameType);
     }
 }

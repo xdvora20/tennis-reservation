@@ -9,7 +9,7 @@ import com.example.tennisreservation.dto.SurfaceTypeResponse;
 import com.example.tennisreservation.entity.SurfaceType;
 import com.example.tennisreservation.mapper.SurfaceTypeMapper;
 import com.example.tennisreservation.service.SurfaceTypeService;
-import com.example.tennisreservation.utils.TestData;
+import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,17 +20,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SurfaceTypeFacadeTest {
 
-    @Mock private SurfaceTypeService surfaceTypeService;
-    @Mock private SurfaceTypeMapper surfaceTypeMapper;
-    @InjectMocks private SurfaceTypeFacade facade;
+    @Mock
+    private SurfaceTypeService surfaceTypeService;
+    @Mock
+    private SurfaceTypeMapper surfaceTypeMapper;
+    @InjectMocks
+    private SurfaceTypeFacade facade;
 
-    private final SurfaceTypeRequest request = TestData.surfaceTypeRequest();
-    private final SurfaceTypeResponse response = TestData.surfaceTypeResponse();
+    private final SurfaceTypeRequest request = SurfaceTypeTestDataFactory.surfaceTypeRequest();
+    private final SurfaceTypeResponse response = SurfaceTypeTestDataFactory.surfaceTypeResponse();
 
     @Test
     void create_mapsRequestCreatesAndReturnsResponse() {
-        SurfaceType entity = TestData.surfaceType();
-        SurfaceType created = TestData.surfaceType();
+        SurfaceType entity = SurfaceTypeTestDataFactory.surfaceType();
+        SurfaceType created = SurfaceTypeTestDataFactory.surfaceType();
         when(surfaceTypeMapper.toEntity(request)).thenReturn(entity);
         when(surfaceTypeService.create(entity)).thenReturn(created);
         when(surfaceTypeMapper.toResponse(created)).thenReturn(response);
@@ -40,8 +43,8 @@ class SurfaceTypeFacadeTest {
 
     @Test
     void update_loadsAppliesChangesAndReturnsResponse() {
-        SurfaceType existing = TestData.surfaceType();
-        SurfaceType updated = TestData.surfaceType();
+        SurfaceType existing = SurfaceTypeTestDataFactory.surfaceType();
+        SurfaceType updated = SurfaceTypeTestDataFactory.surfaceType();
         when(surfaceTypeService.getById(1L)).thenReturn(existing);
         when(surfaceTypeService.update(existing)).thenReturn(updated);
         when(surfaceTypeMapper.toResponse(updated)).thenReturn(response);
@@ -52,7 +55,7 @@ class SurfaceTypeFacadeTest {
 
     @Test
     void getById_returnsMappedResponse() {
-        SurfaceType entity = TestData.surfaceType();
+        SurfaceType entity = SurfaceTypeTestDataFactory.surfaceType();
         when(surfaceTypeService.getById(1L)).thenReturn(entity);
         when(surfaceTypeMapper.toResponse(entity)).thenReturn(response);
 
@@ -61,7 +64,7 @@ class SurfaceTypeFacadeTest {
 
     @Test
     void getAll_returnsMappedResponses() {
-        List<SurfaceType> entities = List.of(TestData.surfaceType());
+        List<SurfaceType> entities = List.of(SurfaceTypeTestDataFactory.surfaceType());
         List<SurfaceTypeResponse> responses = List.of(response);
         when(surfaceTypeService.getAll()).thenReturn(entities);
         when(surfaceTypeMapper.toResponseList(entities)).thenReturn(responses);

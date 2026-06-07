@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import com.example.tennisreservation.dao.SurfaceTypeDao;
 import com.example.tennisreservation.entity.SurfaceType;
 import com.example.tennisreservation.exception.NotFoundException;
-import com.example.tennisreservation.utils.TestData;
+import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -20,12 +20,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SurfaceTypeServiceTest {
 
-    @Mock private SurfaceTypeDao surfaceTypeDao;
-    @InjectMocks private SurfaceTypeService service;
+    @Mock
+    private SurfaceTypeDao surfaceTypeDao;
+    @InjectMocks
+    private SurfaceTypeService service;
 
     @Test
     void getById_existingEntity_returnsIt() {
-        SurfaceType surface = TestData.surfaceType();
+        SurfaceType surface = SurfaceTypeTestDataFactory.surfaceType();
         when(surfaceTypeDao.findById(1L)).thenReturn(Optional.of(surface));
 
         assertThat(service.getById(1L)).isSameAs(surface);
@@ -40,7 +42,7 @@ class SurfaceTypeServiceTest {
 
     @Test
     void getAll_returnsAllFromDao() {
-        List<SurfaceType> all = List.of(TestData.surfaceType());
+        List<SurfaceType> all = List.of(SurfaceTypeTestDataFactory.surfaceType());
         when(surfaceTypeDao.findAll()).thenReturn(all);
 
         assertThat(service.getAll()).isEqualTo(all);
@@ -48,7 +50,7 @@ class SurfaceTypeServiceTest {
 
     @Test
     void create_savesAndReturnsEntity() {
-        SurfaceType surface = TestData.surfaceType();
+        SurfaceType surface = SurfaceTypeTestDataFactory.surfaceType();
         when(surfaceTypeDao.save(surface)).thenReturn(surface);
 
         assertThat(service.create(surface)).isSameAs(surface);
@@ -57,7 +59,7 @@ class SurfaceTypeServiceTest {
 
     @Test
     void update_savesAndReturnsEntity() {
-        SurfaceType surface = TestData.surfaceType();
+        SurfaceType surface = SurfaceTypeTestDataFactory.surfaceType();
         when(surfaceTypeDao.save(surface)).thenReturn(surface);
 
         assertThat(service.update(surface)).isSameAs(surface);

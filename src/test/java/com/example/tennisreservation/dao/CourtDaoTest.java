@@ -4,7 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.tennisreservation.entity.Court;
 import com.example.tennisreservation.entity.SurfaceType;
-import com.example.tennisreservation.utils.TestData;
+import com.example.tennisreservation.utils.CourtTestDataFactory;
+import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +28,12 @@ class CourtDaoTest {
 
     @BeforeEach
     void persistSurface() {
-        surface = tem.persist(TestData.surfaceType());
+        surface = tem.persist(SurfaceTypeTestDataFactory.surfaceType());
     }
 
     @Test
     void save_newEntity_persistsAndAssignsId() {
-        Court saved = dao.save(TestData.court(1, surface));
+        Court saved = dao.save(CourtTestDataFactory.court(1, surface));
 
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getCreatedAt()).isNotNull();
@@ -40,7 +41,7 @@ class CourtDaoTest {
 
     @Test
     void save_existingEntity_updatesIt() {
-        Court saved = dao.save(TestData.court(1, surface));
+        Court saved = dao.save(CourtTestDataFactory.court(1, surface));
         flushAndClear();
 
         saved.setCourtNumber(2);
@@ -52,7 +53,7 @@ class CourtDaoTest {
 
     @Test
     void findById_existingEntity_returnsIt() {
-        Long id = dao.save(TestData.court(1, surface)).getId();
+        Long id = dao.save(CourtTestDataFactory.court(1, surface)).getId();
         flushAndClear();
 
         Court loaded = dao.findById(id).orElseThrow();
@@ -68,7 +69,7 @@ class CourtDaoTest {
 
     @Test
     void findAll_withSavedEntity_returnsIt() {
-        Long id = dao.save(TestData.court(1, surface)).getId();
+        Long id = dao.save(CourtTestDataFactory.court(1, surface)).getId();
         flushAndClear();
 
         assertThat(dao.findAll()).extracting(Court::getId).containsExactly(id);
@@ -76,7 +77,7 @@ class CourtDaoTest {
 
     @Test
     void deleteById_existingEntity_softDeletesAndHidesFromQueries() {
-        Long id = dao.save(TestData.court(1, surface)).getId();
+        Long id = dao.save(CourtTestDataFactory.court(1, surface)).getId();
         flushAndClear();
 
         assertThat(dao.deleteById(id)).isTrue();
@@ -93,7 +94,7 @@ class CourtDaoTest {
 
     @Test
     void delete_detachedEntity_softDeletesIt() {
-        Court saved = dao.save(TestData.court(1, surface));
+        Court saved = dao.save(CourtTestDataFactory.court(1, surface));
         flushAndClear();
 
         dao.delete(saved);
@@ -104,7 +105,7 @@ class CourtDaoTest {
 
     @Test
     void findByCourtNumber_existingNumber_returnsMatch() {
-        dao.save(TestData.court(1, surface));
+        dao.save(CourtTestDataFactory.court(1, surface));
         flushAndClear();
 
         assertThat(dao.findByCourtNumber(1))

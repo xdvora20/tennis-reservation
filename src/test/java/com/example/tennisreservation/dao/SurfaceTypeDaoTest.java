@@ -3,7 +3,7 @@ package com.example.tennisreservation.dao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.tennisreservation.entity.SurfaceType;
-import com.example.tennisreservation.utils.TestData;
+import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ class SurfaceTypeDaoTest {
 
     @Test
     void save_newEntity_persistsAndAssignsId() {
-        SurfaceType saved = dao.save(TestData.surfaceType());
+        SurfaceType saved = dao.save(SurfaceTypeTestDataFactory.surfaceType());
 
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getCreatedAt()).isNotNull();
@@ -32,7 +32,7 @@ class SurfaceTypeDaoTest {
 
     @Test
     void save_existingEntity_updatesIt() {
-        SurfaceType saved = dao.save(TestData.surfaceType("Clay", "5.00"));
+        SurfaceType saved = dao.save(SurfaceTypeTestDataFactory.surfaceType("Clay", "5.00"));
         flushAndClear();
 
         saved.setPricePerMinute(new BigDecimal("9.50"));
@@ -46,7 +46,7 @@ class SurfaceTypeDaoTest {
 
     @Test
     void findById_existingEntity_returnsIt() {
-        Long id = dao.save(TestData.surfaceType("Clay", "5.00")).getId();
+        Long id = dao.save(SurfaceTypeTestDataFactory.surfaceType("Clay", "5.00")).getId();
         flushAndClear();
 
         SurfaceType loaded = dao.findById(id).orElseThrow();
@@ -61,7 +61,7 @@ class SurfaceTypeDaoTest {
 
     @Test
     void findAll_withSavedEntity_returnsIt() {
-        Long id = dao.save(TestData.surfaceType()).getId();
+        Long id = dao.save(SurfaceTypeTestDataFactory.surfaceType()).getId();
         flushAndClear();
 
         assertThat(dao.findAll()).extracting(SurfaceType::getId).containsExactly(id);
@@ -69,7 +69,7 @@ class SurfaceTypeDaoTest {
 
     @Test
     void deleteById_existingEntity_softDeletesAndHidesFromQueries() {
-        Long id = dao.save(TestData.surfaceType()).getId();
+        Long id = dao.save(SurfaceTypeTestDataFactory.surfaceType()).getId();
         flushAndClear();
 
         assertThat(dao.deleteById(id)).isTrue();
@@ -86,7 +86,7 @@ class SurfaceTypeDaoTest {
 
     @Test
     void delete_detachedEntity_softDeletesIt() {
-        SurfaceType saved = dao.save(TestData.surfaceType());
+        SurfaceType saved = dao.save(SurfaceTypeTestDataFactory.surfaceType());
         flushAndClear();
 
         dao.delete(saved);
@@ -97,7 +97,7 @@ class SurfaceTypeDaoTest {
 
     @Test
     void findByName_existingName_returnsMatch() {
-        dao.save(TestData.surfaceType("Clay", "5.00"));
+        dao.save(SurfaceTypeTestDataFactory.surfaceType("Clay", "5.00"));
         flushAndClear();
 
         assertThat(dao.findByName("Clay")).get().extracting(SurfaceType::getName).isEqualTo("Clay");

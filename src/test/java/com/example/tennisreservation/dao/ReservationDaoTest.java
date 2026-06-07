@@ -7,7 +7,10 @@ import com.example.tennisreservation.entity.Customer;
 import com.example.tennisreservation.entity.GameType;
 import com.example.tennisreservation.entity.Reservation;
 import com.example.tennisreservation.entity.SurfaceType;
-import com.example.tennisreservation.utils.TestData;
+import com.example.tennisreservation.utils.CourtTestDataFactory;
+import com.example.tennisreservation.utils.CustomerTestDataFactory;
+import com.example.tennisreservation.utils.ReservationTestDataFactory;
+import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,11 +38,11 @@ class ReservationDaoTest {
 
     @BeforeEach
     void persistPrerequisites() {
-        SurfaceType clay = tem.persist(TestData.surfaceType());
-        court1 = tem.persist(TestData.court(1, clay));
-        court2 = tem.persist(TestData.court(2, clay));
-        alice = tem.persist(TestData.customer("+420700111222", "Alice"));
-        bob = tem.persist(TestData.customer("+420700333444", "Bob"));
+        SurfaceType clay = tem.persist(SurfaceTypeTestDataFactory.surfaceType());
+        court1 = tem.persist(CourtTestDataFactory.court(1, clay));
+        court2 = tem.persist(CourtTestDataFactory.court(2, clay));
+        alice = tem.persist(CustomerTestDataFactory.customer("+420700111222", "Alice"));
+        bob = tem.persist(CustomerTestDataFactory.customer("+420700333444", "Bob"));
     }
 
     @Test
@@ -227,7 +230,9 @@ class ReservationDaoTest {
 
     private Reservation save(
             Court court, Customer customer, LocalDateTime start, LocalDateTime end) {
-        return dao.save(TestData.reservation(court, customer, start, end));
+        return dao.save(
+                ReservationTestDataFactory.reservation(
+                        court, customer, start, end, GameType.SINGLES));
     }
 
     private void flushAndClear() {

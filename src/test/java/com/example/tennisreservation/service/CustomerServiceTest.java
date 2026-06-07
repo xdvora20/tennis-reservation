@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.example.tennisreservation.dao.CustomerDao;
 import com.example.tennisreservation.entity.Customer;
-import com.example.tennisreservation.utils.TestData;
+import com.example.tennisreservation.utils.CustomerTestDataFactory;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ class CustomerServiceTest {
 
     @Test
     void getOrCreate_existingPhone_returnsExistingKeepingStoredName() {
-        Customer existing = TestData.customer("+420700111222", "Alice");
+        Customer existing = CustomerTestDataFactory.customer("+420700111222", "Alice");
         when(customerDao.findByPhoneNumber("+420700111222")).thenReturn(Optional.of(existing));
 
         Customer result = service.getOrCreate("+420700111222", "Different Name");

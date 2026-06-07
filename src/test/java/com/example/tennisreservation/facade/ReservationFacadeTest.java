@@ -16,7 +16,10 @@ import com.example.tennisreservation.mapper.ReservationMapper;
 import com.example.tennisreservation.service.CourtService;
 import com.example.tennisreservation.service.CustomerService;
 import com.example.tennisreservation.service.ReservationService;
-import com.example.tennisreservation.utils.TestData;
+import com.example.tennisreservation.utils.CourtTestDataFactory;
+import com.example.tennisreservation.utils.CustomerTestDataFactory;
+import com.example.tennisreservation.utils.ReservationTestDataFactory;
+import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -29,20 +32,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ReservationFacadeTest {
 
-    @Mock private ReservationService reservationService;
-    @Mock private CourtService courtService;
-    @Mock private CustomerService customerService;
-    @Mock private ReservationMapper reservationMapper;
-    @InjectMocks private ReservationFacade facade;
+    @Mock
+    private ReservationService reservationService;
+    @Mock
+    private CourtService courtService;
+    @Mock
+    private CustomerService customerService;
+    @Mock
+    private ReservationMapper reservationMapper;
+    @InjectMocks
+    private ReservationFacade facade;
 
-    private final ReservationResponse response = TestData.reservationResponse();
+    private final ReservationResponse response = ReservationTestDataFactory.reservationResponse();
 
     @Test
     void create_resolvesCourtAndCustomerAssemblesReservationAndReturnsResponse() {
-        CreateReservationRequest request = TestData.createReservationRequest();
-        Court court = TestData.court(1, TestData.surfaceType());
-        Customer customer = TestData.customer();
-        Reservation saved = TestData.reservation(court, customer, TestData.START, TestData.END);
+        CreateReservationRequest request = ReservationTestDataFactory.createReservationRequest();
+        Court court = CourtTestDataFactory.court(1, SurfaceTypeTestDataFactory.surfaceType());
+        Customer customer = CustomerTestDataFactory.customer();
+        Reservation saved = ReservationTestDataFactory.reservation();
         when(courtService.getByNumber(request.courtNumber())).thenReturn(court);
         when(customerService.getOrCreate(request.phoneNumber(), request.customerName()))
                 .thenReturn(customer);
@@ -63,11 +71,11 @@ class ReservationFacadeTest {
 
     @Test
     void update_loadsAppliesRequestChangesAndReturnsResponse() {
-        UpdateReservationRequest request = TestData.updateReservationRequest();
+        UpdateReservationRequest request = ReservationTestDataFactory.updateReservationRequest();
         Reservation existing =
-                TestData.reservation(
-                        TestData.court(1, TestData.surfaceType()),
-                        TestData.customer(),
+                ReservationTestDataFactory.reservation(
+                        CourtTestDataFactory.court(1, SurfaceTypeTestDataFactory.surfaceType()),
+                        CustomerTestDataFactory.customer(),
                         LocalDateTime.of(2030, 1, 1, 14, 0),
                         LocalDateTime.of(2030, 1, 1, 15, 0),
                         GameType.DOUBLES);
@@ -83,12 +91,7 @@ class ReservationFacadeTest {
 
     @Test
     void getById_returnsMappedResponse() {
-        Reservation reservation =
-                TestData.reservation(
-                        TestData.court(1, TestData.surfaceType()),
-                        TestData.customer(),
-                        TestData.START,
-                        TestData.END);
+        Reservation reservation = ReservationTestDataFactory.reservation();
         when(reservationService.getById(1L)).thenReturn(reservation);
         when(reservationMapper.toResponse(reservation)).thenReturn(response);
 
@@ -97,7 +100,7 @@ class ReservationFacadeTest {
 
     @Test
     void getByCourtNumber_returnsMappedResponses() {
-        List<Reservation> reservations = List.of(reservationEntity());
+        List<Reservation> reservations = List.of(ReservationTestDataFactory.reservation());
         List<ReservationResponse> responses = List.of(response);
         when(reservationService.getByCourtNumber(1)).thenReturn(reservations);
         when(reservationMapper.toResponseList(reservations)).thenReturn(responses);
@@ -107,12 +110,12 @@ class ReservationFacadeTest {
 
     @Test
     void getByCustomerPhone_passesFutureOnlyFlagAndReturnsMappedResponses() {
-        List<Reservation> reservations = List.of(reservationEntity());
+        List<Reservation> reservations = List.of(ReservationTestDataFactory.reservation());
         List<ReservationResponse> responses = List.of(response);
-        when(reservationService.getByCustomerPhone(TestData.PHONE, true)).thenReturn(reservations);
+        when(reservationService.getByCustomerPhone(CustomerTestDataFactory.PHONE, true)).thenReturn(reservations);
         when(reservationMapper.toResponseList(reservations)).thenReturn(responses);
 
-        assertThat(facade.getByCustomerPhone(TestData.PHONE, true)).isEqualTo(responses);
+        assertThat(facade.getByCustomerPhone(CustomerTestDataFactory.PHONE, true)).isEqualTo(responses);
     }
 
     @Test
@@ -120,13 +123,5 @@ class ReservationFacadeTest {
         facade.delete(1L);
 
         verify(reservationService).delete(1L);
-    }
-
-    private static Reservation reservationEntity() {
-        return TestData.reservation(
-                TestData.court(1, TestData.surfaceType()),
-                TestData.customer(),
-                TestData.START,
-                TestData.END);
     }
 }
