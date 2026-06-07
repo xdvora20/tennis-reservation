@@ -19,7 +19,7 @@ class DataInitializerIT {
     @Autowired private CourtDao courtDao;
 
     @Test
-    void seedsTwoSurfaceTypesAndFourCourtsOnStartup() {
+    void startup_initDataEnabled_seedsTwoSurfaceTypesAndFourCourts() {
         assertThat(surfaceTypeDao.findAll()).hasSize(2);
         assertThat(courtDao.findAll()).hasSize(4);
     }
