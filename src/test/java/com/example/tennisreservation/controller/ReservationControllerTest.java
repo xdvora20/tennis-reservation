@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.tennisreservation.dto.CreateReservationRequest;
 import com.example.tennisreservation.dto.UpdateReservationRequest;
+import com.example.tennisreservation.exception.BadRequestException;
+import com.example.tennisreservation.exception.NotFoundException;
 import com.example.tennisreservation.facade.ReservationFacade;
 import com.example.tennisreservation.utils.CustomerTestDataFactory;
 import com.example.tennisreservation.utils.ReservationTestDataFactory;
@@ -65,6 +67,20 @@ class ReservationControllerTest {
     }
 
     @Test
+    void create_overlappingReservation_returns400() throws Exception {
+        when(reservationFacade.create(any(CreateReservationRequest.class)))
+                .thenThrow(new BadRequestException("Reservation overlaps an existing reservation"));
+
+        mockMvc.perform(
+                        post("/api/reservations")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(CREATE_BODY))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Reservation overlaps an existing reservation"));
+    }
+
+    @Test
     void getById_returns200() throws Exception {
         when(reservationFacade.getById(1L))
                 .thenReturn(ReservationTestDataFactory.reservationResponse());
@@ -72,6 +88,17 @@ class ReservationControllerTest {
         mockMvc.perform(get("/api/reservations/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1));
+    }
+
+    @Test
+    void getById_missingEntity_returns404() throws Exception {
+        when(reservationFacade.getById(99L))
+                .thenThrow(new NotFoundException("Reservation not found: 99"));
+
+        mockMvc.perform(get("/api/reservations/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Reservation not found: 99"));
     }
 
     @Test

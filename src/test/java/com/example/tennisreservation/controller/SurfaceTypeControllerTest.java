@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.tennisreservation.dto.SurfaceTypeRequest;
+import com.example.tennisreservation.exception.NotFoundException;
 import com.example.tennisreservation.facade.SurfaceTypeFacade;
 import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
 import java.util.List;
@@ -47,12 +48,27 @@ class SurfaceTypeControllerTest {
     }
 
     @Test
-    void create_blankName_returns400() throws Exception {
+    void create_blankName_returns400WithValidationErrors() throws Exception {
         mockMvc.perform(
                         post("/api/surface-types")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"name\":\"\",\"pricePerMinute\":5.00}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.validationErrors.name").exists());
+    }
+
+    @Test
+    void getById_missingEntity_returns404WithErrorBody() throws Exception {
+        when(surfaceTypeFacade.getById(99L))
+                .thenThrow(new NotFoundException("Surface type not found: 99"));
+
+        mockMvc.perform(get("/api/surface-types/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("Surface type not found: 99"))
+                .andExpect(jsonPath("$.path").value("/api/surface-types/99"));
     }
 
     @Test

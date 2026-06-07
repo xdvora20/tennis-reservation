@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.tennisreservation.dto.CourtRequest;
+import com.example.tennisreservation.exception.NotFoundException;
 import com.example.tennisreservation.facade.CourtFacade;
 import com.example.tennisreservation.utils.CourtTestDataFactory;
 import java.util.List;
@@ -90,5 +91,15 @@ class CourtControllerTest {
         mockMvc.perform(delete("/api/courts/1")).andExpect(status().isNoContent());
 
         verify(courtFacade).delete(1L);
+    }
+
+    @Test
+    void getById_missingEntity_returns404() throws Exception {
+        when(courtFacade.getById(99L)).thenThrow(new NotFoundException("Court not found: 99"));
+
+        mockMvc.perform(get("/api/courts/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Court not found: 99"));
     }
 }
