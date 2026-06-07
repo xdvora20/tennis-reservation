@@ -43,12 +43,21 @@ public final class TestData {
 
     public static Reservation reservation(
             Court court, Customer customer, LocalDateTime start, LocalDateTime end) {
+        return reservation(court, customer, start, end, GameType.SINGLES);
+    }
+
+    public static Reservation reservation(
+            Court court,
+            Customer customer,
+            LocalDateTime start,
+            LocalDateTime end,
+            GameType gameType) {
         Reservation reservation = new Reservation();
         reservation.setCourt(court);
         reservation.setCustomer(customer);
         reservation.setStartTime(start);
         reservation.setEndTime(end);
-        reservation.setGameType(GameType.SINGLES);
+        reservation.setGameType(gameType);
         reservation.setTotalPrice(BigDecimal.ZERO);
         return reservation;
     }
