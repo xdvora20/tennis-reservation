@@ -17,10 +17,11 @@ class JwtServiceTest {
     private final User user = UserTestDataFactory.user();
 
     @Test
-    void generateAccessToken_thenExtractUsername_roundTrips() {
+    void generateAccessToken_thenExtractUsernameAndRole_roundTrips() {
         String token = jwtService.generateAccessToken(user);
 
         assertThat(jwtService.extractUsername(token)).isEqualTo(UserTestDataFactory.USERNAME);
+        assertThat(jwtService.extractRole(token)).isEqualTo("USER");
     }
 
     @Test

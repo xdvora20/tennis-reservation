@@ -2,6 +2,7 @@ package com.example.tennisreservation.facade;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.example.tennisreservation.dto.TokenResponse;
@@ -16,15 +17,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 
 @ExtendWith(MockitoExtension.class)
 class AuthFacadeTest {
 
     @Mock
-    private UserService userService;
+    private AuthenticationManager authenticationManager;
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private UserService userService;
     @Mock
     private JwtService jwtService;
     @InjectMocks
@@ -35,7 +37,6 @@ class AuthFacadeTest {
     @Test
     void login_validCredentials_returnsTokens() {
         when(userService.findByUsername("alice")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("s3cret", user.getPassword())).thenReturn(true);
         when(jwtService.generateAccessToken(user)).thenReturn("access");
         when(jwtService.generateRefreshToken(user)).thenReturn("refresh");
 
@@ -47,19 +48,19 @@ class AuthFacadeTest {
     }
 
     @Test
-    void login_wrongPassword_throwsUnauthorized() {
-        when(userService.findByUsername("alice")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("wrong", user.getPassword())).thenReturn(false);
+    void login_badCredentials_throwsUnauthorized() {
+        when(authenticationManager.authenticate(any()))
+                .thenThrow(new BadCredentialsException("bad"));
 
         assertThatExceptionOfType(UnauthorizedException.class)
                 .isThrownBy(() -> authFacade.login("alice", "wrong"));
     }
 
     @Test
-    void login_unknownUser_throwsUnauthorized() {
-        when(userService.findByUsername("ghost")).thenReturn(Optional.empty());
+    void login_userMissingAfterAuthentication_throwsUnauthorized() {
+        when(userService.findByUsername("alice")).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(UnauthorizedException.class)
-                .isThrownBy(() -> authFacade.login("ghost", "s3cret"));
+                .isThrownBy(() -> authFacade.login("alice", "s3cret"));
     }
 }
