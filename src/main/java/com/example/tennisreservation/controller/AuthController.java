@@ -1,6 +1,7 @@
 package com.example.tennisreservation.controller;
 
 import com.example.tennisreservation.dto.ErrorResponse;
+import com.example.tennisreservation.dto.RefreshRequest;
 import com.example.tennisreservation.dto.TokenResponse;
 import com.example.tennisreservation.exception.UnauthorizedException;
 import com.example.tennisreservation.facade.AuthFacade;
@@ -10,12 +11,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,6 +53,29 @@ public class AuthController {
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
         BasicCredentials credentials = decodeBasic(authorization);
         TokenResponse tokens = authFacade.login(credentials.username(), credentials.password());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokens.accessToken())
+                .body(tokens);
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "Exchange a refresh token for a new access token")
+    @ApiResponses({
+        @ApiResponse(
+                responseCode = "200",
+                description = "New tokens issued",
+                content = @Content(schema = @Schema(implementation = TokenResponse.class))),
+        @ApiResponse(
+                responseCode = "400",
+                description = "Missing refresh token",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+                responseCode = "401",
+                description = "Invalid or expired refresh token",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<TokenResponse> refresh(@Valid @RequestBody RefreshRequest request) {
+        TokenResponse tokens = authFacade.refresh(request.refreshToken());
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokens.accessToken())
                 .body(tokens);

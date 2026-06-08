@@ -5,6 +5,7 @@ import com.example.tennisreservation.entity.User;
 import com.example.tennisreservation.exception.UnauthorizedException;
 import com.example.tennisreservation.security.JwtService;
 import com.example.tennisreservation.service.UserService;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,6 +34,26 @@ public class AuthFacade {
                         .findByUsername(username)
                         .orElseThrow(
                                 () -> new UnauthorizedException("Invalid username or password"));
+        return tokensFor(user);
+    }
+
+    public TokenResponse refresh(String refreshToken) {
+        String username;
+        try {
+            if (!jwtService.isRefreshToken(refreshToken)) {
+                throw new UnauthorizedException("Not a refresh token");
+            }
+            username = jwtService.extractUsername(refreshToken);
+        } catch (JwtException _) {
+            throw new UnauthorizedException("Invalid or expired refresh token");
+        }
+        User user = userService
+                .findByUsername(username)
+                .orElseThrow(() -> new UnauthorizedException("Invalid or expired refresh token"));
+        return tokensFor(user);
+    }
+
+    private TokenResponse tokensFor(User user) {
         return TokenResponse.bearer(
                 jwtService.generateAccessToken(user), jwtService.generateRefreshToken(user));
     }
