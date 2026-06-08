@@ -2,7 +2,6 @@ package com.example.tennisreservation.security;
 
 import com.example.tennisreservation.entity.User;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
@@ -35,20 +34,24 @@ public class JwtService {
         return buildToken(user, REFRESH_TOKEN_TYPE, properties.refreshTokenExpiration().toMillis());
     }
 
+    public Claims parseClaims(String token) {
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+    }
+
+    public boolean isAccessToken(Claims claims) {
+        return ACCESS_TOKEN_TYPE.equals(claims.get(TOKEN_TYPE_CLAIM, String.class));
+    }
+
+    public String getRole(Claims claims) {
+        return claims.get(ROLE_CLAIM, String.class);
+    }
+
     public String extractUsername(String token) {
-        return parse(token).getSubject();
-    }
-
-    public String extractRole(String token) {
-        return parse(token).get(ROLE_CLAIM, String.class);
-    }
-
-    public boolean isAccessToken(String token) {
-        return ACCESS_TOKEN_TYPE.equals(parse(token).get(TOKEN_TYPE_CLAIM, String.class));
+        return parseClaims(token).getSubject();
     }
 
     public boolean isRefreshToken(String token) {
-        return REFRESH_TOKEN_TYPE.equals(parse(token).get(TOKEN_TYPE_CLAIM, String.class));
+        return REFRESH_TOKEN_TYPE.equals(parseClaims(token).get(TOKEN_TYPE_CLAIM, String.class));
     }
 
     private String buildToken(User user, String type, long expirationMillis) {
@@ -61,10 +64,5 @@ public class JwtService {
                 .expiration(Date.from(now.plusMillis(expirationMillis)))
                 .signWith(key)
                 .compact();
-    }
-
-    /** Parses and verifies the token, throwing {@link JwtException} when invalid or expired. */
-    private Claims parse(String token) {
-        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
 }

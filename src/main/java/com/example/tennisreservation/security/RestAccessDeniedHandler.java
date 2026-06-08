@@ -15,8 +15,8 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(
             HttpServletRequest request,
             HttpServletResponse response,
-            AccessDeniedException accessDeniedException)
-            throws IOException {
+            AccessDeniedException accessDeniedException
+    ) throws IOException {
         response.sendError(HttpStatus.FORBIDDEN.value(), "Access denied");
     }
 }

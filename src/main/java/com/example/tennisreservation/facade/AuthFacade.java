@@ -34,7 +34,8 @@ public class AuthFacade {
                         .findByUsername(username)
                         .orElseThrow(
                                 () -> new UnauthorizedException("Invalid username or password"));
-        return tokensFor(user);
+        return TokenResponse.bearer(
+                jwtService.generateAccessToken(user), jwtService.generateRefreshToken(user));
     }
 
     public TokenResponse refresh(String refreshToken) {
@@ -47,14 +48,8 @@ public class AuthFacade {
         } catch (JwtException _) {
             throw new UnauthorizedException("Invalid or expired refresh token");
         }
-        User user = userService
-                .findByUsername(username)
-                .orElseThrow(() -> new UnauthorizedException("Invalid or expired refresh token"));
-        return tokensFor(user);
-    }
-
-    private TokenResponse tokensFor(User user) {
-        return TokenResponse.bearer(
-                jwtService.generateAccessToken(user), jwtService.generateRefreshToken(user));
+        User user = userService.findByUsername(username)
+                        .orElseThrow(() -> new UnauthorizedException("Invalid or expired refresh token"));
+        return TokenResponse.bearer(jwtService.generateAccessToken(user), refreshToken);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.tennisreservation.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -35,14 +36,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private void authenticate(String token, HttpServletRequest request) {
         try {
-            if (!jwtService.isAccessToken(token)) {
+            Claims claims = jwtService.parseClaims(token);
+            if (!jwtService.isAccessToken(claims)) {
                 return;
             }
-            String username = jwtService.extractUsername(token);
-            String role = jwtService.extractRole(token);
-            var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+            var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + jwtService.getRole(claims)));
             var authentication =
-                    new UsernamePasswordAuthenticationToken(username, null, authorities);
+                    new UsernamePasswordAuthenticationToken(claims.getSubject(), null, authorities);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (JwtException _) {

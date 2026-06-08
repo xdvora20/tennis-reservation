@@ -66,17 +66,16 @@ class AuthFacadeTest {
     }
 
     @Test
-    void refresh_validRefreshToken_returnsNewTokens() {
+    void refresh_validRefreshToken_returnsNewAccessTokenAndReusesRefreshToken() {
         when(jwtService.isRefreshToken("refresh")).thenReturn(true);
         when(jwtService.extractUsername("refresh")).thenReturn("alice");
         when(userService.findByUsername("alice")).thenReturn(Optional.of(user));
         when(jwtService.generateAccessToken(user)).thenReturn("access2");
-        when(jwtService.generateRefreshToken(user)).thenReturn("refresh2");
 
         TokenResponse response = authFacade.refresh("refresh");
 
         assertThat(response.accessToken()).isEqualTo("access2");
-        assertThat(response.refreshToken()).isEqualTo("refresh2");
+        assertThat(response.refreshToken()).isEqualTo("refresh");
     }
 
     @Test
