@@ -6,7 +6,9 @@ import com.example.tennisreservation.exception.UnauthorizedException;
 import com.example.tennisreservation.security.JwtService;
 import com.example.tennisreservation.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,15 +17,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AuthFacade {
 
+    private final AuthenticationManager authenticationManager;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     public TokenResponse login(String username, String rawPassword) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, rawPassword));
+        } catch (AuthenticationException _) {
+            throw new UnauthorizedException("Invalid username or password");
+        }
         User user =
                 userService
                         .findByUsername(username)
-                        .filter(u -> passwordEncoder.matches(rawPassword, u.getPassword()))
                         .orElseThrow(
                                 () -> new UnauthorizedException("Invalid username or password"));
         return TokenResponse.bearer(

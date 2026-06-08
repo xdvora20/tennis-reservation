@@ -39,6 +39,10 @@ public class JwtService {
         return parse(token).getSubject();
     }
 
+    public String extractRole(String token) {
+        return parse(token).get(ROLE_CLAIM, String.class);
+    }
+
     public boolean isAccessToken(String token) {
         return ACCESS_TOKEN_TYPE.equals(parse(token).get(TOKEN_TYPE_CLAIM, String.class));
     }
