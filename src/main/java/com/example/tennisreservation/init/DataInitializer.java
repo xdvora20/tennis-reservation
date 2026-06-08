@@ -3,7 +3,9 @@ package com.example.tennisreservation.init;
 import com.example.tennisreservation.dao.CourtDao;
 import com.example.tennisreservation.dao.SurfaceTypeDao;
 import com.example.tennisreservation.entity.Court;
+import com.example.tennisreservation.entity.Role;
 import com.example.tennisreservation.entity.SurfaceType;
+import com.example.tennisreservation.service.UserService;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -18,6 +20,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private final SurfaceTypeDao surfaceTypeDao;
     private final CourtDao courtDao;
+    private final UserService userService;
 
     @Override
     @Transactional
@@ -31,6 +34,9 @@ public class DataInitializer implements CommandLineRunner {
         courtDao.save(court(2, clay));
         courtDao.save(court(3, grass));
         courtDao.save(court(4, grass));
+
+        userService.create("admin", "admin123", Role.ADMIN);
+        userService.create("user", "user123", Role.USER);
     }
 
     private SurfaceType surfaceType(String name, String pricePerMinute) {
