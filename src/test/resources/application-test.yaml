@@ -6,3 +6,8 @@ spring:
 
 app:
   init-data: false
+  security:
+    jwt:
+      secret: test-secret-key-must-be-at-least-256-bits-long-0123456789abcdef
+      access-token-expiration: PT15M
+      refresh-token-expiration: P7D
