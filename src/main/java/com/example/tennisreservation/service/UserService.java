@@ -4,6 +4,7 @@ import com.example.tennisreservation.dao.UserDao;
 import com.example.tennisreservation.entity.Role;
 import com.example.tennisreservation.entity.User;
 import com.example.tennisreservation.exception.BadRequestException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,10 @@ public class UserService {
 
     private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
+
+    public Optional<User> findByUsername(String username) {
+        return userDao.findByUsername(username);
+    }
 
     public User create(String username, String rawPassword, Role role) {
         if (userDao.findByUsername(username).isPresent()) {
