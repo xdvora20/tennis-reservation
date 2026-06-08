@@ -4,6 +4,8 @@ import com.example.tennisreservation.dao.UserDao;
 import com.example.tennisreservation.entity.Role;
 import com.example.tennisreservation.entity.User;
 import com.example.tennisreservation.exception.BadRequestException;
+import com.example.tennisreservation.exception.NotFoundException;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,5 +31,19 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setRole(role);
         return userDao.save(user);
+    }
+
+    public User getById(Long id) {
+        return userDao.findById(id).orElseThrow(() -> new NotFoundException("User not found: " + id));
+    }
+
+    public List<User> getAll() {
+        return userDao.findAll();
+    }
+
+    public void delete(Long id) {
+        if (!userDao.deleteById(id)) {
+            throw new NotFoundException("User not found: " + id);
+        }
     }
 }

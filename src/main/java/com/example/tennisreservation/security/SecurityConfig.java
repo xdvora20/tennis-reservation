@@ -39,6 +39,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATHS)
                         .permitAll()
+                        // User management is ADMIN-only (must precede the GET read rule)
+                        .requestMatchers("/api/users/**")
+                        .hasRole("ADMIN")
                         // Creating a reservation is the one write a USER may perform
                         .requestMatchers(HttpMethod.POST, "/api/reservations")
                         .hasAnyRole("USER", "ADMIN")
