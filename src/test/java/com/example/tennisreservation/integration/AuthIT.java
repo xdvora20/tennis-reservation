@@ -134,6 +134,18 @@ class AuthIT {
     }
 
     @Test
+    void userRole_cannotListUsers_returns403() throws Exception {
+        mockMvc.perform(get("/api/users").header(HttpHeaders.AUTHORIZATION, bearer(Role.USER)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adminRole_canListUsers_returns200() throws Exception {
+        mockMvc.perform(get("/api/users").header(HttpHeaders.AUTHORIZATION, bearer(Role.ADMIN)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void refresh_validRefreshToken_returnsNewUsableAccessToken() throws Exception {
         User admin = userService.create("admin", "admin123", Role.ADMIN);
         String refreshToken = jwtService.generateRefreshToken(admin);

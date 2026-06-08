@@ -11,7 +11,9 @@ import com.example.tennisreservation.dao.UserDao;
 import com.example.tennisreservation.entity.Role;
 import com.example.tennisreservation.entity.User;
 import com.example.tennisreservation.exception.BadRequestException;
+import com.example.tennisreservation.exception.NotFoundException;
 import com.example.tennisreservation.utils.UserTestDataFactory;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,5 +53,46 @@ class UserServiceTest {
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> userService.create("alice", "s3cret", Role.USER));
         verify(userDao, never()).save(any());
+    }
+
+    @Test
+    void getById_existing_returnsUser() {
+        User user = UserTestDataFactory.user();
+        when(userDao.findById(1L)).thenReturn(Optional.of(user));
+
+        assertThat(userService.getById(1L)).isSameAs(user);
+    }
+
+    @Test
+    void getById_missing_throwsNotFound() {
+        when(userDao.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> userService.getById(99L));
+    }
+
+    @Test
+    void getAll_delegatesToDao() {
+        List<User> users = List.of(UserTestDataFactory.user());
+        when(userDao.findAll()).thenReturn(users);
+
+        assertThat(userService.getAll()).isEqualTo(users);
+    }
+
+    @Test
+    void delete_existing_succeeds() {
+        when(userDao.deleteById(1L)).thenReturn(true);
+
+        userService.delete(1L);
+
+        verify(userDao).deleteById(1L);
+    }
+
+    @Test
+    void delete_missing_throwsNotFound() {
+        when(userDao.deleteById(99L)).thenReturn(false);
+
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> userService.delete(99L));
     }
 }
