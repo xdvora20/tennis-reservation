@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -84,5 +85,38 @@ class AuthControllerTest {
                                         AuthTestDataFactory.basicAuthHeader("alice", "wrong")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401));
+    }
+
+    @Test
+    void refresh_validToken_returns200WithNewTokens() throws Exception {
+        when(authFacade.refresh("refresh")).thenReturn(AuthTestDataFactory.tokenResponse());
+
+        mockMvc.perform(
+                        post("/api/auth/refresh")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"refreshToken\":\"refresh\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("access"));
+    }
+
+    @Test
+    void refresh_invalidToken_returns401() throws Exception {
+        when(authFacade.refresh("bad"))
+                .thenThrow(new UnauthorizedException("Invalid or expired refresh token"));
+
+        mockMvc.perform(
+                        post("/api/auth/refresh")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"refreshToken\":\"bad\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void refresh_blankToken_returns400() throws Exception {
+        mockMvc.perform(
+                        post("/api/auth/refresh")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"refreshToken\":\"\"}"))
+                .andExpect(status().isBadRequest());
     }
 }

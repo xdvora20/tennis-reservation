@@ -12,12 +12,14 @@ import com.example.tennisreservation.dao.SurfaceTypeDao;
 import com.example.tennisreservation.entity.Court;
 import com.example.tennisreservation.entity.Role;
 import com.example.tennisreservation.entity.SurfaceType;
+import com.example.tennisreservation.entity.User;
 import com.example.tennisreservation.security.JwtService;
 import com.example.tennisreservation.service.UserService;
 import com.example.tennisreservation.utils.AuthTestDataFactory;
 import com.example.tennisreservation.utils.CourtTestDataFactory;
 import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
 import com.example.tennisreservation.utils.UserTestDataFactory;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,6 +131,40 @@ class AuthIT {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{\"courtNumber\":2,\"surfaceTypeId\":" + surface.getId() + "}"))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void refresh_validRefreshToken_returnsNewUsableAccessToken() throws Exception {
+        User admin = userService.create("admin", "admin123", Role.ADMIN);
+        String refreshToken = jwtService.generateRefreshToken(admin);
+
+        String content =
+                mockMvc.perform(
+                                post("/api/auth/refresh")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"refreshToken\":\"" + refreshToken + "\"}"))
+                        .andExpect(status().isOk())
+                        .andExpect(header().string(HttpHeaders.AUTHORIZATION, startsWith("Bearer ")))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+        String newAccessToken = JsonPath.read(content, "$.accessToken");
+
+        mockMvc.perform(
+                        get("/api/courts")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + newAccessToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void refresh_withAccessToken_returns401() throws Exception {
+        String accessToken = jwtService.generateAccessToken(UserTestDataFactory.user());
+
+        mockMvc.perform(
+                        post("/api/auth/refresh")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"refreshToken\":\"" + accessToken + "\"}"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

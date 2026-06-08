@@ -11,6 +11,7 @@ import com.example.tennisreservation.exception.UnauthorizedException;
 import com.example.tennisreservation.security.JwtService;
 import com.example.tennisreservation.service.UserService;
 import com.example.tennisreservation.utils.UserTestDataFactory;
+import io.jsonwebtoken.JwtException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,5 +63,45 @@ class AuthFacadeTest {
 
         assertThatExceptionOfType(UnauthorizedException.class)
                 .isThrownBy(() -> authFacade.login("alice", "s3cret"));
+    }
+
+    @Test
+    void refresh_validRefreshToken_returnsNewTokens() {
+        when(jwtService.isRefreshToken("refresh")).thenReturn(true);
+        when(jwtService.extractUsername("refresh")).thenReturn("alice");
+        when(userService.findByUsername("alice")).thenReturn(Optional.of(user));
+        when(jwtService.generateAccessToken(user)).thenReturn("access2");
+        when(jwtService.generateRefreshToken(user)).thenReturn("refresh2");
+
+        TokenResponse response = authFacade.refresh("refresh");
+
+        assertThat(response.accessToken()).isEqualTo("access2");
+        assertThat(response.refreshToken()).isEqualTo("refresh2");
+    }
+
+    @Test
+    void refresh_accessTokenInsteadOfRefresh_throwsUnauthorized() {
+        when(jwtService.isRefreshToken("access")).thenReturn(false);
+
+        assertThatExceptionOfType(UnauthorizedException.class)
+                .isThrownBy(() -> authFacade.refresh("access"));
+    }
+
+    @Test
+    void refresh_invalidToken_throwsUnauthorized() {
+        when(jwtService.isRefreshToken("garbage")).thenThrow(new JwtException("invalid"));
+
+        assertThatExceptionOfType(UnauthorizedException.class)
+                .isThrownBy(() -> authFacade.refresh("garbage"));
+    }
+
+    @Test
+    void refresh_userMissingForValidToken_throwsUnauthorized() {
+        when(jwtService.isRefreshToken("refresh")).thenReturn(true);
+        when(jwtService.extractUsername("refresh")).thenReturn("alice");
+        when(userService.findByUsername("alice")).thenReturn(Optional.empty());
+
+        assertThatExceptionOfType(UnauthorizedException.class)
+                .isThrownBy(() -> authFacade.refresh("refresh"));
     }
 }
