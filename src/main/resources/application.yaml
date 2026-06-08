@@ -23,3 +23,8 @@ spring:
 
 app:
   init-data: true
+  security:
+    jwt:
+      secret: ${JWT_SECRET:change-me-in-prod-very-long-256-bit-secret-key-value-0123456789}
+      access-token-expiration: PT15M
+      refresh-token-expiration: P7D
