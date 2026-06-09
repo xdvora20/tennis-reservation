@@ -123,10 +123,8 @@ class ReservationDaoTest {
     }
 
     @Test
-    void findByCourtNumber_multipleCourts_returnsOnlyThatCourtOrderedByCreatedAt()
-            throws InterruptedException {
+    void findByCourtNumber_multipleCourts_returnsOnlyThatCourtOrderedByCreatedAt() {
         Reservation first = save(court1, alice, at(10), at(11));
-        Thread.sleep(10); // ensure a distinct @CreationTimestamp so ordering is deterministic
         Reservation second = save(court1, alice, at(12), at(13));
         save(court2, bob, at(10), at(11));
         flushAndClear();
@@ -145,10 +143,8 @@ class ReservationDaoTest {
     }
 
     @Test
-    void findByCustomerPhone_multipleReservations_returnsOrderedByCreatedAt()
-            throws InterruptedException {
+    void findByCustomerPhone_multipleReservations_returnsOrderedByCreatedAt() {
         Reservation first = save(court1, alice, at(10), at(11));
-        Thread.sleep(10); // ensure a distinct @CreationTimestamp so ordering is deterministic
         Reservation second = save(court1, alice, at(12), at(13));
         flushAndClear();
 

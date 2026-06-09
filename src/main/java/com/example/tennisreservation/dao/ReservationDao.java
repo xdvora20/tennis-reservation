@@ -20,7 +20,7 @@ public class ReservationDao extends BaseDao<Reservation> {
                         JOIN FETCH r.court c
                         JOIN FETCH r.customer
                         WHERE c.courtNumber = :number
-                        ORDER BY r.createdAt
+                        ORDER BY r.createdAt, r.id
                         """,
                         Reservation.class)
                 .setParameter("number", courtNumber)
@@ -36,7 +36,7 @@ public class ReservationDao extends BaseDao<Reservation> {
                 WHERE cust.phoneNumber = :phone
                 """
                         + (futureOnly ? "AND r.startTime > :now\n" : "")
-                        + "ORDER BY r.createdAt";
+                        + "ORDER BY r.createdAt, r.id";
 
         TypedQuery<Reservation> query =
                 em.createQuery(jpql, Reservation.class).setParameter("phone", phoneNumber);
