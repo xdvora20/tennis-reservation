@@ -135,3 +135,33 @@ classDiagram
     Reservation ..> GameType
     User ..> Role
 ```
+
+## Use cases (use-case diagram)
+
+```mermaid
+flowchart LR
+    USER(("USER"))
+    ADMIN(("ADMIN"))
+
+    subgraph api["Tennis Reservation API"]
+        login([Register and log in])
+        browse([Browse courts and surface types])
+        view([View reservations by court or phone])
+        book([Create a reservation])
+        courts([Manage courts])
+        surfaces([Manage surface types])
+        editRes([Update or delete reservations])
+        users([Manage user accounts])
+    end
+
+    USER --- login
+    USER --- browse
+    USER --- view
+    USER --- book
+
+    ADMIN -->|is a| USER
+    ADMIN --- courts
+    ADMIN --- surfaces
+    ADMIN --- editRes
+    ADMIN --- users
+```
