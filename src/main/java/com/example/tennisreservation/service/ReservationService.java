@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ReservationService {
 
+    private static final Duration MAX_RESERVATION_DURATION = Duration.ofHours(8);
+
     private final ReservationDao reservationDao;
 
     public Reservation create(Reservation reservation) {
@@ -55,6 +57,14 @@ public class ReservationService {
     private void validateInterval(LocalDateTime start, LocalDateTime end) {
         if (!end.isAfter(start)) {
             throw new BadRequestException("Reservation end time must be after start time");
+        }
+        if (!start.isAfter(LocalDateTime.now())) {
+            throw new BadRequestException("Reservation must start in the future");
+        }
+        if (Duration.between(start, end).compareTo(MAX_RESERVATION_DURATION) > 0) {
+            throw new BadRequestException(
+                    "Reservation must not be longer than " + MAX_RESERVATION_DURATION.toHours() + " hours"
+            );
         }
     }
 

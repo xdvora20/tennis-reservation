@@ -17,6 +17,7 @@ import com.example.tennisreservation.entity.GameType;
 import com.example.tennisreservation.entity.Reservation;
 import com.example.tennisreservation.exception.BadRequestException;
 import com.example.tennisreservation.exception.NotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -85,6 +86,25 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> service.create(reservation))
                 .isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    void create_startInPast_throwsBadRequest() {
+        LocalDateTime past = LocalDateTime.now().minusDays(1);
+        Reservation reservation = reservation("5.00", past, past.plusHours(1), GameType.SINGLES);
+
+        assertThatThrownBy(() -> service.create(reservation))
+                .isInstanceOf(BadRequestException.class);
+        verify(reservationDao, never()).save(any());
+    }
+
+    @Test
+    void create_durationOverEightHours_throwsBadRequest() {
+        Reservation reservation = reservation("5.00", START, START.plusHours(9), GameType.SINGLES);
+
+        assertThatThrownBy(() -> service.create(reservation))
+                .isInstanceOf(BadRequestException.class);
+        verify(reservationDao, never()).save(any());
     }
 
     @Test
