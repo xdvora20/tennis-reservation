@@ -1,13 +1,18 @@
 package com.example.tennisreservation.facade;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.tennisreservation.dto.SurfaceTypeRequest;
 import com.example.tennisreservation.dto.SurfaceTypeResponse;
 import com.example.tennisreservation.entity.SurfaceType;
+import com.example.tennisreservation.exception.ConflictException;
 import com.example.tennisreservation.mapper.SurfaceTypeMapper;
+import com.example.tennisreservation.service.CourtService;
 import com.example.tennisreservation.service.SurfaceTypeService;
 import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
 import java.util.List;
@@ -24,6 +29,8 @@ class SurfaceTypeFacadeTest {
     private SurfaceTypeService surfaceTypeService;
     @Mock
     private SurfaceTypeMapper surfaceTypeMapper;
+    @Mock
+    private CourtService courtService;
     @InjectMocks
     private SurfaceTypeFacade facade;
 
@@ -77,5 +84,13 @@ class SurfaceTypeFacadeTest {
         facade.delete(1L);
 
         verify(surfaceTypeService).delete(1L);
+    }
+
+    @Test
+    void delete_surfaceTypeUsedByCourt_throwsConflict() {
+        when(courtService.existsForSurfaceType(1L)).thenReturn(true);
+
+        assertThatThrownBy(() -> facade.delete(1L)).isInstanceOf(ConflictException.class);
+        verify(surfaceTypeService, never()).delete(any());
     }
 }

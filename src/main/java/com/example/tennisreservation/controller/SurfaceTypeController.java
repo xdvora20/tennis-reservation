@@ -100,12 +100,16 @@ public class SurfaceTypeController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Delete a surface type")
+    @Operation(summary = "Delete a surface type (rejected if it is used by existing courts)")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Surface type deleted"),
         @ApiResponse(
                 responseCode = "404",
                 description = "Surface type not found",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+                responseCode = "409",
+                description = "Surface type is used by existing courts",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public void delete(@PathVariable Long id) {

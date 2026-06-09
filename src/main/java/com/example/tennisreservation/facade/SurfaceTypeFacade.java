@@ -3,7 +3,9 @@ package com.example.tennisreservation.facade;
 import com.example.tennisreservation.dto.SurfaceTypeRequest;
 import com.example.tennisreservation.dto.SurfaceTypeResponse;
 import com.example.tennisreservation.entity.SurfaceType;
+import com.example.tennisreservation.exception.ConflictException;
 import com.example.tennisreservation.mapper.SurfaceTypeMapper;
+import com.example.tennisreservation.service.CourtService;
 import com.example.tennisreservation.service.SurfaceTypeService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SurfaceTypeFacade {
 
     private final SurfaceTypeService surfaceTypeService;
+    private final CourtService courtService;
     private final SurfaceTypeMapper surfaceTypeMapper;
 
     public SurfaceTypeResponse create(SurfaceTypeRequest request) {
@@ -40,6 +43,9 @@ public class SurfaceTypeFacade {
     }
 
     public void delete(Long id) {
+        if (courtService.existsForSurfaceType(id)) {
+            throw new ConflictException("Cannot delete a surface type used by existing courts");
+        }
         surfaceTypeService.delete(id);
     }
 }

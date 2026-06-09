@@ -224,6 +224,29 @@ class ReservationDaoTest {
         assertThat(dao.existsOverlap(court1.getId(), at(10), at(11), null)).isFalse();
     }
 
+    @Test
+    void existsByCourtId_activeReservation_returnsTrue() {
+        save(court1, alice, at(10), at(11));
+        flushAndClear();
+
+        assertThat(dao.existsByCourtId(court1.getId())).isTrue();
+    }
+
+    @Test
+    void existsByCourtId_noReservation_returnsFalse() {
+        assertThat(dao.existsByCourtId(court1.getId())).isFalse();
+    }
+
+    @Test
+    void existsByCourtId_onlySoftDeletedReservation_returnsFalse() {
+        Reservation existing = save(court1, alice, at(10), at(11));
+        tem.flush();
+        dao.delete(existing);
+        tem.flush();
+
+        assertThat(dao.existsByCourtId(court1.getId())).isFalse();
+    }
+
     private Reservation save(
             Court court, Customer customer, LocalDateTime start, LocalDateTime end) {
         return dao.save(

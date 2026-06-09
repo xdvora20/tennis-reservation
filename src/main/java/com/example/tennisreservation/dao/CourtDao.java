@@ -18,4 +18,13 @@ public class CourtDao extends BaseDao<Court> {
                 .stream()
                 .findFirst();
     }
+
+    public boolean existsBySurfaceTypeId(Long surfaceTypeId) {
+        return em.createQuery(
+                                "SELECT COUNT(c) FROM Court c WHERE c.surfaceType.id = :surfaceTypeId",
+                                Long.class)
+                        .setParameter("surfaceTypeId", surfaceTypeId)
+                        .getSingleResult()
+                > 0;
+    }
 }

@@ -3,8 +3,10 @@ package com.example.tennisreservation.facade;
 import com.example.tennisreservation.dto.CourtRequest;
 import com.example.tennisreservation.dto.CourtResponse;
 import com.example.tennisreservation.entity.Court;
+import com.example.tennisreservation.exception.ConflictException;
 import com.example.tennisreservation.mapper.CourtMapper;
 import com.example.tennisreservation.service.CourtService;
+import com.example.tennisreservation.service.ReservationService;
 import com.example.tennisreservation.service.SurfaceTypeService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ public class CourtFacade {
 
     private final CourtService courtService;
     private final SurfaceTypeService surfaceTypeService;
+    private final ReservationService reservationService;
     private final CourtMapper courtMapper;
 
     public CourtResponse create(CourtRequest request) {
@@ -44,6 +47,9 @@ public class CourtFacade {
     }
 
     public void delete(Long id) {
+        if (reservationService.existsForCourt(id)) {
+            throw new ConflictException("Cannot delete a court with active reservations");
+        }
         courtService.delete(id);
     }
 }

@@ -1,6 +1,9 @@
 package com.example.tennisreservation.facade;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -8,8 +11,10 @@ import com.example.tennisreservation.dto.CourtRequest;
 import com.example.tennisreservation.dto.CourtResponse;
 import com.example.tennisreservation.entity.Court;
 import com.example.tennisreservation.entity.SurfaceType;
+import com.example.tennisreservation.exception.ConflictException;
 import com.example.tennisreservation.mapper.CourtMapper;
 import com.example.tennisreservation.service.CourtService;
+import com.example.tennisreservation.service.ReservationService;
 import com.example.tennisreservation.service.SurfaceTypeService;
 import com.example.tennisreservation.utils.CourtTestDataFactory;
 import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
@@ -29,6 +34,8 @@ class CourtFacadeTest {
     private SurfaceTypeService surfaceTypeService;
     @Mock
     private CourtMapper courtMapper;
+    @Mock
+    private ReservationService reservationService;
     @InjectMocks
     private CourtFacade facade;
 
@@ -88,5 +95,13 @@ class CourtFacadeTest {
         facade.delete(1L);
 
         verify(courtService).delete(1L);
+    }
+
+    @Test
+    void delete_courtWithReservations_throwsConflict() {
+        when(reservationService.existsForCourt(1L)).thenReturn(true);
+
+        assertThatThrownBy(() -> facade.delete(1L)).isInstanceOf(ConflictException.class);
+        verify(courtService, never()).delete(any());
     }
 }

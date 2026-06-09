@@ -67,4 +67,13 @@ public class ReservationDao extends BaseDao<Reservation> {
         }
         return query.getSingleResult() > 0;
     }
+
+    public boolean existsByCourtId(Long courtId) {
+        return em.createQuery(
+                                "SELECT COUNT(r) FROM Reservation r WHERE r.court.id = :courtId",
+                                Long.class)
+                        .setParameter("courtId", courtId)
+                        .getSingleResult()
+                > 0;
+    }
 }

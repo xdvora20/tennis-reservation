@@ -54,6 +54,10 @@ public class ReservationService {
         }
     }
 
+    public boolean existsForCourt(Long courtId) {
+        return reservationDao.existsByCourtId(courtId);
+    }
+
     private void validateInterval(LocalDateTime start, LocalDateTime end) {
         if (!end.isAfter(start)) {
             throw new BadRequestException("Reservation end time must be after start time");

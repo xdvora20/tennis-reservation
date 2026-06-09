@@ -103,12 +103,16 @@ public class CourtController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Delete a court")
+    @Operation(summary = "Delete a court (rejected if it has active reservations)")
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Court deleted"),
         @ApiResponse(
                 responseCode = "404",
                 description = "Court not found",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+                responseCode = "409",
+                description = "Court has active reservations",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public void delete(@PathVariable Long id) {

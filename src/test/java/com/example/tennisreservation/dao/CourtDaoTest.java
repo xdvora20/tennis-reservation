@@ -119,6 +119,19 @@ class CourtDaoTest {
         assertThat(dao.findByCourtNumber(99)).isEmpty();
     }
 
+    @Test
+    void existsBySurfaceTypeId_courtUsesIt_returnsTrue() {
+        dao.save(CourtTestDataFactory.court(1, surface));
+        flushAndClear();
+
+        assertThat(dao.existsBySurfaceTypeId(surface.getId())).isTrue();
+    }
+
+    @Test
+    void existsBySurfaceTypeId_noCourt_returnsFalse() {
+        assertThat(dao.existsBySurfaceTypeId(surface.getId())).isFalse();
+    }
+
     private void flushAndClear() {
         tem.flush();
         tem.clear();

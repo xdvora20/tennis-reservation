@@ -107,4 +107,20 @@ class CourtIT {
 
         mockMvc.perform(delete("/api/courts/{id}", id)).andExpect(status().isNoContent());
     }
+
+    @Test
+    void delete_courtWithActiveReservation_returns409() throws Exception {
+        var court = courtDao.save(CourtTestDataFactory.court(5, surface));
+        mockMvc.perform(
+                        post("/api/reservations")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        "{\"courtNumber\":5,\"startTime\":\"2031-01-01T10:00:00\","
+                                                + "\"endTime\":\"2031-01-01T11:00:00\",\"gameType\":\"SINGLES\","
+                                                + "\"phoneNumber\":\"+420700111222\",\"customerName\":\"Alice\"}"))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(delete("/api/courts/{id}", court.getId()))
+                .andExpect(status().isConflict());
+    }
 }

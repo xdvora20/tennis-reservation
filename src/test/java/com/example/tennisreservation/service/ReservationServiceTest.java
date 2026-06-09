@@ -173,6 +173,13 @@ class ReservationServiceTest {
     }
 
     @Test
+    void existsForCourt_delegatesToDao() {
+        when(reservationDao.existsByCourtId(7L)).thenReturn(true);
+
+        assertThat(service.existsForCourt(7L)).isTrue();
+    }
+
+    @Test
     void delete_existingEntity_deletes() {
         when(reservationDao.deleteById(1L)).thenReturn(true);
 

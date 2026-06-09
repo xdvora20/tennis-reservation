@@ -95,4 +95,11 @@ class CourtServiceTest {
 
         assertThatThrownBy(() -> service.delete(1L)).isInstanceOf(NotFoundException.class);
     }
+
+    @Test
+    void existsForSurfaceType_delegatesToDao() {
+        when(courtDao.existsBySurfaceTypeId(3L)).thenReturn(true);
+
+        assertThat(service.existsForSurfaceType(3L)).isTrue();
+    }
 }

@@ -76,4 +76,17 @@ class SurfaceTypeIT {
 
         mockMvc.perform(delete("/api/surface-types/{id}", id)).andExpect(status().isNoContent());
     }
+
+    @Test
+    void delete_surfaceTypeUsedByCourt_returns409() throws Exception {
+        Long surfaceId = surfaceTypeDao.save(SurfaceTypeTestDataFactory.surfaceType()).getId();
+        mockMvc.perform(
+                        post("/api/courts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"courtNumber\":1,\"surfaceTypeId\":" + surfaceId + "}"))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(delete("/api/surface-types/{id}", surfaceId))
+                .andExpect(status().isConflict());
+    }
 }

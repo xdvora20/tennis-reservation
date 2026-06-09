@@ -42,4 +42,8 @@ public class CourtService {
             throw new NotFoundException("Court not found: " + id);
         }
     }
+
+    public boolean existsForSurfaceType(Long surfaceTypeId) {
+        return courtDao.existsBySurfaceTypeId(surfaceTypeId);
+    }
 }
