@@ -11,9 +11,11 @@ import com.example.tennisreservation.dao.SurfaceTypeDao;
 import com.example.tennisreservation.entity.Court;
 import com.example.tennisreservation.entity.Role;
 import com.example.tennisreservation.entity.SurfaceType;
+import com.example.tennisreservation.entity.User;
 import com.example.tennisreservation.service.UserService;
 import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,10 +50,12 @@ class DataInitializerTest {
     @Test
     void run_databaseAlreadyPopulated_seedsNothing() {
         when(surfaceTypeDao.findAll()).thenReturn(List.of(SurfaceTypeTestDataFactory.surfaceType()));
+        when(userService.findByUsername(any())).thenReturn(Optional.of(new User()));
 
         dataInitializer.run();
 
         verify(surfaceTypeDao, never()).save(any());
         verify(courtDao, never()).save(any());
+        verify(userService, never()).create(any(), any(), any());
     }
 }
