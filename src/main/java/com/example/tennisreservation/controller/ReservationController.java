@@ -37,7 +37,14 @@ public class ReservationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Create a reservation (returns the calculated price)")
+    @Operation(
+            summary = "Create a reservation (returns the calculated price)",
+            description =
+                    "Price = surface price-per-minute × duration in minutes × game-type multiplier"
+                            + " (doubles ×1.5). The interval must start in the future, last at most"
+                            + " 8 hours, and not overlap another reservation on the same court. The"
+                            + " customer is resolved by phone number — created if new, otherwise its"
+                            + " originally stored name is kept.")
     @ApiResponses({
         @ApiResponse(
                 responseCode = "201",
@@ -45,7 +52,9 @@ public class ReservationController {
                 content = @Content(schema = @Schema(implementation = ReservationResponse.class))),
         @ApiResponse(
                 responseCode = "400",
-                description = "Invalid request, bad interval or overlapping reservation",
+                description =
+                        "Validation failed — start in the past, end not after start, duration over"
+                                + " 8 hours, or an overlapping reservation on the court",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
                 responseCode = "404",
@@ -73,7 +82,11 @@ public class ReservationController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update a reservation (re-prices and re-validates the interval)")
+    @Operation(
+            summary = "Update a reservation (re-prices and re-validates the interval)",
+            description =
+                    "Re-applies the same rules as create — future start, at most 8 hours, no overlap"
+                            + " on the court — and recalculates the price.")
     @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
@@ -81,7 +94,9 @@ public class ReservationController {
                 content = @Content(schema = @Schema(implementation = ReservationResponse.class))),
         @ApiResponse(
                 responseCode = "400",
-                description = "Invalid request, bad interval or overlapping reservation",
+                description =
+                        "Validation failed — start in the past, end not after start, duration over"
+                                + " 8 hours, or an overlapping reservation on the court",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
                 responseCode = "404",
