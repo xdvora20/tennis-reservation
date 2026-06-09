@@ -54,6 +54,21 @@ class CourtIT {
     }
 
     @Test
+    void recreate_afterSoftDeletingSameCourtNumber_returns409Conflict() throws Exception {
+        var existing = courtDao.save(CourtTestDataFactory.court(7, surface));
+        mockMvc.perform(delete("/api/courts/" + existing.getId())).andExpect(status().isNoContent());
+
+        mockMvc.perform(
+                        post("/api/courts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        "{\"courtNumber\":7,\"surfaceTypeId\":"
+                                                + surface.getId()
+                                                + "}"))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     void getAll_returns200() throws Exception {
         courtDao.save(CourtTestDataFactory.court(1, surface));
 
