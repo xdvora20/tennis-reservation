@@ -5,9 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.example.tennisreservation.dto.RegisterRequest;
 import com.example.tennisreservation.dto.TokenResponse;
+import com.example.tennisreservation.dto.UserResponse;
+import com.example.tennisreservation.entity.Role;
 import com.example.tennisreservation.entity.User;
 import com.example.tennisreservation.exception.UnauthorizedException;
+import com.example.tennisreservation.mapper.UserMapper;
 import com.example.tennisreservation.security.JwtService;
 import com.example.tennisreservation.service.UserService;
 import com.example.tennisreservation.utils.UserTestDataFactory;
@@ -30,10 +34,21 @@ class AuthFacadeTest {
     private UserService userService;
     @Mock
     private JwtService jwtService;
+    @Mock
+    private UserMapper userMapper;
     @InjectMocks
     private AuthFacade authFacade;
 
     private final User user = UserTestDataFactory.user();
+
+    @Test
+    void register_createsUserWithUserRoleAndReturnsResponse() {
+        UserResponse response = UserTestDataFactory.userResponse();
+        when(userService.create("alice", "s3cret", Role.USER)).thenReturn(user);
+        when(userMapper.toResponse(user)).thenReturn(response);
+
+        assertThat(authFacade.register(new RegisterRequest("alice", "s3cret"))).isSameAs(response);
+    }
 
     @Test
     void login_validCredentials_returnsTokens() {

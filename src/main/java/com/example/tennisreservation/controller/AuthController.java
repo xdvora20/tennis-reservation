@@ -2,7 +2,9 @@ package com.example.tennisreservation.controller;
 
 import com.example.tennisreservation.dto.ErrorResponse;
 import com.example.tennisreservation.dto.RefreshRequest;
+import com.example.tennisreservation.dto.RegisterRequest;
 import com.example.tennisreservation.dto.TokenResponse;
+import com.example.tennisreservation.dto.UserResponse;
 import com.example.tennisreservation.exception.UnauthorizedException;
 import com.example.tennisreservation.facade.AuthFacade;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,11 +18,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,6 +36,23 @@ public class AuthController {
     private static final String BASIC_PREFIX = "Basic ";
 
     private final AuthFacade authFacade;
+
+    @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Register a new USER account")
+    @ApiResponses({
+        @ApiResponse(
+                responseCode = "201",
+                description = "Account created",
+                content = @Content(schema = @Schema(implementation = UserResponse.class))),
+        @ApiResponse(
+                responseCode = "400",
+                description = "Invalid request or username already taken",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public UserResponse register(@Valid @RequestBody RegisterRequest request) {
+        return authFacade.register(request);
+    }
 
     @PostMapping("/login")
     @Operation(

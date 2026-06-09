@@ -81,6 +81,24 @@ class AuthIT {
     }
 
     @Test
+    void register_thenLogin_createsUsableUserAccount() throws Exception {
+        mockMvc.perform(
+                        post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"username\":\"newbie\",\"password\":\"pw123456\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.username").value("newbie"))
+                .andExpect(jsonPath("$.role").value("USER"));
+
+        mockMvc.perform(
+                        post("/api/auth/login")
+                                .header(
+                                        HttpHeaders.AUTHORIZATION,
+                                        AuthTestDataFactory.basicAuthHeader("newbie", "pw123456")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void login_validCredentials_returns200WithTokenInBodyAndHeader() throws Exception {
         userService.create("admin", "admin123", Role.ADMIN);
 

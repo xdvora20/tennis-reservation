@@ -1,8 +1,12 @@
 package com.example.tennisreservation.facade;
 
+import com.example.tennisreservation.dto.RegisterRequest;
 import com.example.tennisreservation.dto.TokenResponse;
+import com.example.tennisreservation.dto.UserResponse;
+import com.example.tennisreservation.entity.Role;
 import com.example.tennisreservation.entity.User;
 import com.example.tennisreservation.exception.UnauthorizedException;
+import com.example.tennisreservation.mapper.UserMapper;
 import com.example.tennisreservation.security.JwtService;
 import com.example.tennisreservation.service.UserService;
 import io.jsonwebtoken.JwtException;
@@ -21,6 +25,13 @@ public class AuthFacade {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtService jwtService;
+    private final UserMapper userMapper;
+
+    @Transactional
+    public UserResponse register(RegisterRequest request) {
+        User user = userService.create(request.username(), request.password(), Role.USER);
+        return userMapper.toResponse(user);
+    }
 
     public TokenResponse login(String username, String rawPassword) {
         try {

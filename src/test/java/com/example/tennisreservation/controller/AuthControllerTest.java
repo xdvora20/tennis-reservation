@@ -7,9 +7,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.tennisreservation.dto.RegisterRequest;
 import com.example.tennisreservation.exception.UnauthorizedException;
 import com.example.tennisreservation.facade.AuthFacade;
 import com.example.tennisreservation.utils.AuthTestDataFactory;
+import com.example.tennisreservation.utils.UserTestDataFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,29 @@ class AuthControllerTest {
     private MockMvc mockMvc;
     @MockitoBean
     private AuthFacade authFacade;
+
+    @Test
+    void register_validRequest_returns201WithUserRole() throws Exception {
+        when(authFacade.register(any(RegisterRequest.class)))
+                .thenReturn(UserTestDataFactory.userResponse());
+
+        mockMvc.perform(
+                        post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"username\":\"alice\",\"password\":\"s3cret\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.username").value("alice"))
+                .andExpect(jsonPath("$.role").value("USER"));
+    }
+
+    @Test
+    void register_blankPassword_returns400() throws Exception {
+        mockMvc.perform(
+                        post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"username\":\"alice\",\"password\":\"\"}"))
+                .andExpect(status().isBadRequest());
+    }
 
     @Test
     void login_validCredentials_returns200WithTokenAndAuthorizationHeader() throws Exception {
