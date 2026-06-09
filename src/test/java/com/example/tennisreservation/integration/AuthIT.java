@@ -13,8 +13,10 @@ import com.example.tennisreservation.entity.Court;
 import com.example.tennisreservation.entity.Role;
 import com.example.tennisreservation.entity.SurfaceType;
 import com.example.tennisreservation.entity.User;
+import com.example.tennisreservation.security.JwtProperties;
 import com.example.tennisreservation.security.JwtService;
 import com.example.tennisreservation.service.UserService;
+import java.time.Duration;
 import com.example.tennisreservation.utils.AuthTestDataFactory;
 import com.example.tennisreservation.utils.CourtTestDataFactory;
 import com.example.tennisreservation.utils.SurfaceTypeTestDataFactory;
@@ -41,6 +43,8 @@ class AuthIT {
     private MockMvc mockMvc;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private JwtProperties jwtProperties;
     @Autowired
     private UserService userService;
     @Autowired
@@ -75,6 +79,22 @@ class AuthIT {
     @Test
     void protectedEndpoint_withBlankBearerToken_returns401() throws Exception {
         mockMvc.perform(get("/api/courts").header(HttpHeaders.AUTHORIZATION, "Bearer "))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void protectedEndpoint_withExpiredAccessToken_returns401() throws Exception {
+        JwtService expiredIssuer =
+                new JwtService(
+                        new JwtProperties(
+                                jwtProperties.secret(),
+                                Duration.ofSeconds(-1),
+                                jwtProperties.refreshTokenExpiration()));
+        String expired =
+                expiredIssuer.generateAccessToken(
+                        UserTestDataFactory.user("tester", "hash", Role.USER));
+
+        mockMvc.perform(get("/api/courts").header(HttpHeaders.AUTHORIZATION, "Bearer " + expired))
                 .andExpect(status().isUnauthorized());
     }
 
