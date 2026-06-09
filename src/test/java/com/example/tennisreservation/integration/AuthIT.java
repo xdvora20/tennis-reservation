@@ -73,6 +73,12 @@ class AuthIT {
     }
 
     @Test
+    void protectedEndpoint_withBlankBearerToken_returns401() throws Exception {
+        mockMvc.perform(get("/api/courts").header(HttpHeaders.AUTHORIZATION, "Bearer "))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void protectedEndpoint_withRefreshToken_returns401() throws Exception {
         String refreshToken = jwtService.generateRefreshToken(UserTestDataFactory.user());
 
