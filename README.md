@@ -44,8 +44,9 @@ app:
       refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:P7D}
 ```
 
-- **`app.init-data`** — when `true`, the app seeds **2 surface types**, **4 courts**, and two login
-  accounts on startup (only if the database is empty).
+- **`app.init-data`** — when `true`, on startup the app seeds **2 surface types** and **4 courts**
+  (only when no surface types exist yet), plus the two login accounts below (each created only if that
+  username is missing).
 - **JWT config** — the secret and both token validities are read from configuration and overridable
   via the `JWT_SECRET` / `JWT_ACCESS_TOKEN_EXPIRATION` / `JWT_REFRESH_TOKEN_EXPIRATION` env vars; the
   secret is a dev default and **must be overridden** in any real deployment.
@@ -68,6 +69,9 @@ admin (`POST /api/users`) or startup seeding.
 2. Send the access token as `Authorization: Bearer <token>` on subsequent requests.
 3. **Refresh** — `POST /api/auth/refresh` with the refresh token returns a new access token (the
    refresh token itself is reused until it expires).
+
+In Swagger UI, use the **Authorize** button to enter Basic credentials for `POST /api/auth/login`,
+then paste the returned access token as a `Bearer` token to call the secured endpoints.
 
 ### Role matrix
 
