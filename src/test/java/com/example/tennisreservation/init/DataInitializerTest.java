@@ -1,6 +1,7 @@
 package com.example.tennisreservation.init;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,9 +36,10 @@ class DataInitializerTest {
     private DataInitializer dataInitializer;
 
     @Test
-    void run_emptyDatabase_seedsTwoSurfaceTypesAndFourCourts() {
+    void run_emptyDatabase_seedsCourtsAndUsers() {
         when(surfaceTypeDao.findAll()).thenReturn(List.of());
         when(surfaceTypeDao.save(any(SurfaceType.class))).thenAnswer(call -> call.getArgument(0));
+        when(userService.findByUsername(any())).thenReturn(Optional.empty());
 
         dataInitializer.run();
 
@@ -48,7 +50,7 @@ class DataInitializerTest {
     }
 
     @Test
-    void run_databaseAlreadyPopulated_seedsNothing() {
+    void run_fullySeeded_seedsNothing() {
         when(surfaceTypeDao.findAll()).thenReturn(List.of(SurfaceTypeTestDataFactory.surfaceType()));
         when(userService.findByUsername(any())).thenReturn(Optional.of(new User()));
 
@@ -57,5 +59,30 @@ class DataInitializerTest {
         verify(surfaceTypeDao, never()).save(any());
         verify(courtDao, never()).save(any());
         verify(userService, never()).create(any(), any(), any());
+    }
+
+    @Test
+    void run_courtsExistButUsersMissing_seedsOnlyUsers() {
+        when(surfaceTypeDao.findAll()).thenReturn(List.of(SurfaceTypeTestDataFactory.surfaceType()));
+        when(userService.findByUsername(any())).thenReturn(Optional.empty());
+
+        dataInitializer.run();
+
+        verify(surfaceTypeDao, never()).save(any());
+        verify(courtDao, never()).save(any());
+        verify(userService).create("admin", "admin123", Role.ADMIN);
+        verify(userService).create("user", "user123", Role.USER);
+    }
+
+    @Test
+    void run_onlyAdminMissing_seedsOnlyAdmin() {
+        when(surfaceTypeDao.findAll()).thenReturn(List.of(SurfaceTypeTestDataFactory.surfaceType()));
+        when(userService.findByUsername("admin")).thenReturn(Optional.empty());
+        when(userService.findByUsername("user")).thenReturn(Optional.of(new User()));
+
+        dataInitializer.run();
+
+        verify(userService).create("admin", "admin123", Role.ADMIN);
+        verify(userService, never()).create(eq("user"), any(), any());
     }
 }

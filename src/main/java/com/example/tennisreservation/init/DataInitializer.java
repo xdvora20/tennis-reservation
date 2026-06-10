@@ -25,19 +25,30 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (surfaceTypeDao.findAll().isEmpty()) {
-            SurfaceType clay = surfaceTypeDao.save(surfaceType("Clay", "5.00"));
-            SurfaceType grass = surfaceTypeDao.save(surfaceType("Grass", "7.00"));
-            courtDao.save(court(1, clay));
-            courtDao.save(court(2, clay));
-            courtDao.save(court(3, grass));
-            courtDao.save(court(4, grass));
+        seedCourts();
+        seedUsers();
+    }
+
+    private void seedCourts() {
+        if (!surfaceTypeDao.findAll().isEmpty()) {
+            return;
         }
-        if (userService.findByUsername("admin").isEmpty()) {
-            userService.create("admin", "admin123", Role.ADMIN);
-        }
-        if (userService.findByUsername("user").isEmpty()) {
-            userService.create("user", "user123", Role.USER);
+        SurfaceType clay = surfaceTypeDao.save(surfaceType("Clay", "5.00"));
+        SurfaceType grass = surfaceTypeDao.save(surfaceType("Grass", "7.00"));
+        courtDao.save(court(1, clay));
+        courtDao.save(court(2, clay));
+        courtDao.save(court(3, grass));
+        courtDao.save(court(4, grass));
+    }
+
+    private void seedUsers() {
+        seedUser("admin", "admin123", Role.ADMIN);
+        seedUser("user", "user123", Role.USER);
+    }
+
+    private void seedUser(String username, String rawPassword, Role role) {
+        if (userService.findByUsername(username).isEmpty()) {
+            userService.create(username, rawPassword, role);
         }
     }
 
