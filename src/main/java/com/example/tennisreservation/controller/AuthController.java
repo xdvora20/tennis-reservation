@@ -8,10 +8,12 @@ import com.example.tennisreservation.dto.UserResponse;
 import com.example.tennisreservation.exception.UnauthorizedException;
 import com.example.tennisreservation.facade.AuthFacade;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.nio.charset.StandardCharsets;
@@ -60,6 +62,7 @@ public class AuthController {
             description =
                     "Send credentials via the Authorization: Basic header. On success the access"
                             + " token is also returned in the Authorization response header.")
+    @SecurityRequirement(name = "basicAuth")
     @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
@@ -71,7 +74,9 @@ public class AuthController {
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<TokenResponse> login(
-            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
+            @Parameter(hidden = true)
+                    @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false)
+                    String authorization) {
         BasicCredentials credentials = decodeBasic(authorization);
         TokenResponse tokens = authFacade.login(credentials.username(), credentials.password());
         return ResponseEntity.ok()

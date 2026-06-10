@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     private static final String BEARER_SCHEME = "bearerAuth";
+    private static final String BASIC_SCHEME = "basicAuth";
 
     @Bean
     public OpenAPI tennisReservationOpenApi() {
@@ -29,6 +30,11 @@ public class OpenApiConfig {
                                         new SecurityScheme()
                                                 .type(SecurityScheme.Type.HTTP)
                                                 .scheme("bearer")
-                                                .bearerFormat("JWT")));
+                                                .bearerFormat("JWT"))
+                                .addSecuritySchemes(
+                                        BASIC_SCHEME,
+                                        new SecurityScheme()
+                                                .type(SecurityScheme.Type.HTTP)
+                                                .scheme("basic")));
     }
 }
